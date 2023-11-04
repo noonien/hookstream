@@ -1,0 +1,33 @@
+builds:
+  - env: [ CGO_ENABLED=0 ]
+    goos: [ linux, windows, darwin]
+    goarch: [ "386", amd64, arm, arm64 ]
+    goarm: [ 6, 7 ]
+    ignore:
+      - { goos: windows, goarch: arm}
+      - { goos: darwin, goarch: 386 }
+      - { goos: darwin, goarm: 6 }
+    flags: [ -trimpath ]
+    ldflags: [ -s -w -linkmode=internal ]
+    tags: [ netgo, usergo ]
+    mod_timestamp: "{{ .CommitTimestamp }}"
+      
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+archives:
+  - name_template: >-
+      {{- .ProjectName }}_
+      {{- .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else if and (eq .Arch "arm64") (eq .Os "darwin") }}aarch64
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end -}}
+    format_overrides:
+      - goos: windows
+        format: zip
